@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strconv"
 	"strings"
-    "strconv"
 	"text/template"
 
 	"github.com/Showmax/go-fqdn"
@@ -310,10 +310,10 @@ func sendMessage(recipient, sender, subject, body string) error {
 	msg.SetBody("text/plain", body)
 	//fmt.Println(body)
 
-    port, err := strconv.Atoi(SMTP_PORT)
-    if err != nil {
-        return fmt.Errorf("faild to parse smtp  port '%s': %s", SMTP_PORT, err)
-    }
+	port, err := strconv.Atoi(SMTP_PORT)
+	if err != nil {
+		return fmt.Errorf("faild to parse smtp  port '%s': %s", SMTP_PORT, err)
+	}
 
 	mailer := gomail.Dialer{Host: SMTP_HOST, Port: port}
 	if err := mailer.DialAndSend(msg); err != nil {
@@ -341,13 +341,13 @@ func passwordSha512Crypt(password string) (string, error) {
 }
 
 func init() {
-    if SMTP_HOST == "" {
-        SMTP_HOST = "localhost"
-    }
+	if SMTP_HOST == "" {
+		SMTP_HOST = "localhost"
+	}
 
-    if SMTP_PORT == "" {
-        SMTP_PORT = "25"
-    }
+	if SMTP_PORT == "" {
+		SMTP_PORT = "25"
+	}
 
 	if PERMITTED_DOMAIN == "" {
 		PERMITTED_DOMAIN = "example.com"
