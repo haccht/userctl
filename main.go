@@ -312,7 +312,7 @@ func sendMessage(recipient, sender, subject, body string) error {
 
 	port, err := strconv.Atoi(SMTP_PORT)
 	if err != nil {
-		return fmt.Errorf("faild to parse smtp  port '%s': %s", SMTP_PORT, err)
+		return fmt.Errorf("faild to parse smtp port '%s': %s", SMTP_PORT, err)
 	}
 
 	mailer := gomail.Dialer{Host: SMTP_HOST, Port: port}
