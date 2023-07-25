@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+    "strconv"
 	"text/template"
 
 	"github.com/Showmax/go-fqdn"
@@ -17,10 +18,12 @@ import (
 	"gopkg.in/gomail.v2"
 )
 
-const SMTP_HOST = "noc-1.ocn.ad.jp"
-const SMTP_PORT = 25
+var (
+	SMTP_HOST        string
+	SMTP_PORT        string
+	PERMITTED_DOMAIN string
+)
 
-var PermittedDomains string
 var DefaultLoginDefs = map[string]string{"UID_MIN": "5000"}
 
 var opts struct {
@@ -305,18 +308,23 @@ func sendMessage(recipient, sender, subject, body string) error {
 	msg.SetHeader("From", sender)
 	msg.SetHeader("Subject", subject)
 	msg.SetBody("text/plain", body)
-	fmt.Println(body)
+	//fmt.Println(body)
 
-	mailer := gomail.Dialer{Host: SMTP_HOST, Port: SMTP_PORT}
-    if err := mailer.DialAndSend(msg); err != nil {
-        return fmt.Errorf("failed to send message: %s", err)
+    port, err := strconv.Atoi(SMTP_PORT)
+    if err != nil {
+        return fmt.Errorf("faild to parse smtp  port '%s': %s", SMTP_PORT, err)
     }
-    return nil
+
+	mailer := gomail.Dialer{Host: SMTP_HOST, Port: port}
+	if err := mailer.DialAndSend(msg); err != nil {
+		return fmt.Errorf("failed to send message: %s", err)
+	}
+	return nil
 }
 
 func usernameFromMailAddr(mail string) (string, error) {
 	tokens := strings.SplitN(mail, "@", 2)
-	domains := strings.Split(PermittedDomains, ",")
+	domains := strings.Split(PERMITTED_DOMAIN, ",")
 
 	if len(tokens) < 2 || !slices.Contains(domains, tokens[1]) {
 		return "", fmt.Errorf("Invalid email address: %s", mail)
@@ -333,8 +341,16 @@ func passwordSha512Crypt(password string) (string, error) {
 }
 
 func init() {
-	if PermittedDomains == "" {
-		PermittedDomains = "example.com"
+    if SMTP_HOST == "" {
+        SMTP_HOST = "localhost"
+    }
+
+    if SMTP_PORT == "" {
+        SMTP_PORT = "25"
+    }
+
+	if PERMITTED_DOMAIN == "" {
+		PERMITTED_DOMAIN = "example.com"
 	}
 }
 
